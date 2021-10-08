@@ -4,48 +4,65 @@ var HEIGHT = window.innerHeight;
 var PARTICLES_NUM = 1000;
 
 //Objects
-var img;
-var shrinker;
-var splasher;
-var imageCenter;
+let img;
+let shrinker;
+let splasher;
+let imageCenter;
 
 //Lists
-var colors;
+let colors;
 
-function preload(){
-	img = loadImage("images/7.jpg");
-	imageCenter = createVector(WIDTH/2, HEIGHT/2);
+
+function preload() {
+	// console.log("preloading...")
+	img = loadImage("images/shokudo3000_2_head.png");
+	imageCenter = createVector(WIDTH / 2, HEIGHT / 2);
 }
 
-function setup(){
+function setup() {
+	// console.log("setting up...")
+	reset();
+}
+
+function reset() {
+	// console.log("resetting...");
+
 	pixelDensity(1);
 	createCanvas(WIDTH, HEIGHT);
 
 	//Extract particle colors from image
-	var extractor = new Extractor();
-	var kernel_size = extractor.calculateKernelSize(img, PARTICLES_NUM);
+	let extractor = new Extractor();
+	let kernel_size = extractor.calculateKernelSize(img, PARTICLES_NUM);
 	colors = extractor.getColors(extractor.extractBoxes(img, kernel_size));
 	colors = shuffle(colors);
-	console.log(colors.length);
 
 	shrinker = new ImageShrinker(img, imageCenter.copy());
 	splasher = new Splasher(imageCenter.copy(), colors);
+
+	background(0);
+
 }
 
-function draw(){
+function draw() {
+
 	background(0);
-	
+
+	translate(random(-5, 5), random(-5, 5));
+	rotate(random(-0.01, 0.01));
+
 	shrinker.draw();
 	splasher.update();
 	splasher.draw();
 
-}
+	if (frameCount % 1000 == 0) {
+		if (shrinker) {
+			shrinker.shrink(function () {
+				splasher.restart();
+				setTimeout(function () {
+					reset();
+				}, 1400);
+			});
+		}
 
-
-function mouseClicked(){
-	if(shrinker){
-		shrinker.shrink(function(){
-			splasher.restart();
-		});
 	}
 }
